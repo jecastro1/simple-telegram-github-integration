@@ -51,7 +51,7 @@ def _handles(service: str, event: str):
 def _handle(app: Flask, service: str, event: str):
     if event not in _handlers[service]:
         raise NotImplementedError(f'Not implemented {service}:{event}')
-    return _handlers[service][event]
+    return _handlers[service][event](app)
 
 
 @_handles('github', 'ping')
