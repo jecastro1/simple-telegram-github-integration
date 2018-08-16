@@ -66,18 +66,28 @@ def _github_ping(app: Flask):
         return make_response(f'Fail: {response["description"]}', 500)
 
 
+def _commit_line(commit):
+    commit_hash = commit['id']
+    commit_message = commit['message']
+    commit_url = commit['url']
+    return f'[{commit_hash:8.8}]({commit_url}): {commit_message}'
+
+
 @_handles('github', 'push')
 def _github_push(app: Flask):
     payload = request.get_json()
 
-    commits = [commit['id'] for commit in payload['commits']]
+    commits = payload['commits']
     repo = payload['repository']['name']
     pusher = payload['pusher']['name']
 
-    header = f'{pusher} has pushed the following commits in {repo}:'
-    body = indent('\n'.join(f'{commit:8.8}' for commit in commits), '- ')
+    header = f'{pusher} has pushed the following commits to {repo}:'
+    body = indent('\n'.join(_commit_line(commit) for commit in commits), '- ')
 
-    response = send_telegram_message(f'{header}\n{body}', TELEGRAM_ID)
+    response = send_telegram_message(f'{header}\n{body}', TELEGRAM_ID, {
+        'parse_mode': 'Markdown',
+        'disable_web_page_preview': True
+    })
 
     if response['ok']:
         return make_response('OK', 200)
