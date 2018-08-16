@@ -84,10 +84,11 @@ def _github_push(app: Flask):
     header = f'{pusher} has pushed the following commits to {repo}:'
     body = indent('\n'.join(_commit_line(commit) for commit in commits), '- ')
 
-    response = send_telegram_message(f'{header}\n{body}', TELEGRAM_ID, {
-        'parse_mode': 'Markdown',
-        'disable_web_page_preview': True
-    })
+    response = send_telegram_message(
+        f'{header}\n{body}',
+        TELEGRAM_ID,
+        parse_mode='Markdown',
+        disable_web_page_preview=True)
 
     if response['ok']:
         return make_response('OK', 200)
